@@ -35,7 +35,6 @@ jobs:
             p/nodejs
             p/owasp-top-ten
             p/jwt
-            p/express
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 

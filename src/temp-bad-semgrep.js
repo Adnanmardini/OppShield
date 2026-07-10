@@ -1,10 +1,7 @@
-const { exec } = require('child_process');
+const { exec } = require("child_process");
 
-// Command injection - unsanitized input passed directly to exec
-function runUserCommand(userInput) {
-  exec(`ls ${userInput}`, (err, stdout) => {
-    console.log(stdout);
-  });
+function runCommand(userInput) {
+    exec(userInput);
 }
 
-module.exports = { runUserCommand };
+module.exports = runCommand;

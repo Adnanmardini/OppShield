@@ -7,30 +7,46 @@ on:
     branches: [main]
 
 jobs:
-  security-scan:
-    name: Security Scanning
+  gitleaks-scan:
+    name: Gitleaks Secret Scan
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Secrets detection (Gitleaks)
+      - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Static analysis (Semgrep)
+  semgrep-scan:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep
         uses: semgrep/semgrep-action@v1
         with:
           config: >-
             p/nodejs
             p/owasp-top-ten
             p/jwt
+            p/express
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
-      - name: Dependency scan (Trivy)
+  trivy-fs-scan:
+    name: Trivy Filesystem Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
@@ -41,15 +57,18 @@ jobs:
           output: trivy-results.sarif
 
       - name: Upload Trivy results
-        uses: github/codeql-action/upload-sarif@v3
         if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
 
   test:
     name: Tests
     runs-on: ubuntu-latest
-    needs: security-scan
+    needs:
+      - gitleaks-scan
+      - semgrep-scan
+      - trivy-fs-scan
     services:
       postgres:
         image: postgres:15-alpine

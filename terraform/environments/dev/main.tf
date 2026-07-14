@@ -45,3 +45,21 @@ module "budget" {
   project          = var.project
 }
 
+module "rds" {
+  source = "../../modules/rds"
+  environment                = var.environment
+  project                    = var.project
+  vpc_id                     = module.vpc.vpc_id
+  database_subnet_ids        = module.vpc.database_subnet_ids
+  allowed_security_group_ids = [] # will be filled in once DevOps has an app/ECS security group to reference
+  multi_az                   = var.rds_multi_az
+}
+
+
+module "secrets" {
+  source = "../../modules/secrets"
+  master_user_secret_arn  = module.rds.master_user_secret_arn
+  db_host                 = split(":", module.rds.db_endpoint)[0]
+  environment = var.environment
+  project     = var.project
+}

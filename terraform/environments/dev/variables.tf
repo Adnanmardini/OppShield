@@ -19,7 +19,7 @@ variable "azs" {
 variable "project" {
   description = "Project name used in all resource names"
   type        = string
-  default     = "oppshield"
+  default     = "opsshield"
 }
 
 variable "environment" {
@@ -54,17 +54,11 @@ variable "budget_alert_emails" {
   default     = [] # fill in via terraform.tfvars - do not hardcode real emails here
 }
 
+variable "rds_multi_az" {
+  description = "Multi-AZ for dev - see reasoning in Well-Architected doc"
+  type        = bool
+  default     = false
+}
 
 
 
-#variable "budget_limit_usd" {
-  #description = "Monthly budget threshold for dev"
-  #type        = number
- # default     = 20
-#}
-
-#variable "budget_alert_emails" {
- # description = "Emails to notify on budget threshold breaches"
- # type        = list(string)
-  #default     = []
-#}

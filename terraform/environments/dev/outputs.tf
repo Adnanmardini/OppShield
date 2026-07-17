@@ -91,3 +91,22 @@ output "ecs_log_group_name" {
 output "cloudtrail_bucket_name" {
   value = module.cloudtrail.bucket_name
 }
+
+# .......ECR.......
+output "ecr_repository_url" {
+  value = module.ecr.repository_url
+}
+
+output "github_actions_role_arn" {
+  value = module.ecr.github_actions_role_arn
+}
+
+#.......ALB.......
+output "alb_logs_bucket_name" {
+  value = module.alb.alb_logs_bucket_name
+}
+
+output "alb_target_group_arn" {
+  description = "Handsoff to DevOps - needed for ECS service definition task registering with the ALB"
+  value       = module.alb.target_group_arn
+}

@@ -38,6 +38,7 @@ module "vpc" {
   database_subnet_cidrs  = var.database_subnet_cidrs
 }
 
+
 module "budget" {
   source = "../../modules/budget"
   environment      = var.environment
@@ -45,6 +46,7 @@ module "budget" {
   alert_emails     = var.budget_alert_emails
   project          = var.project
 }
+
 
 module "rds" {
   source = "../../modules/rds"
@@ -65,6 +67,7 @@ module "secrets" {
   project     = var.project
 }
 
+
 module "ecs" {
   source = "../../modules/ecs"
 
@@ -75,10 +78,28 @@ module "ecs" {
 }
 
 
-
 module "cloudtrail" {
   source = "../../modules/cloudtrail"
 
   environment         = var.environment
   project             = var.project
+}
+
+
+module "ecr" {
+  source = "../../modules/ecr"
+  environment    = var.environment
+  project        = var.project
+  github_username     = var.github_username
+  github_repo    = var.github_repo
+  github_branch  = var.github_branch # test deployment branch, will be updated in prod
+}
+
+
+module "alb" {
+  source = "../../modules/alb"
+  environment       = var.environment
+  project           = var.project
+  vpc_id            = module.vpc.vpc_id
+  public_subnet_ids = module.vpc.public_subnet_ids
 }

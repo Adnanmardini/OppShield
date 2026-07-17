@@ -48,6 +48,7 @@ variable "budget_limit_usd" {
   type        = number
   default     = 20
 }
+
 variable "budget_alert_emails" {
   description = "Emails to notify on budget threshold breaches"
   type        = list(string)
@@ -60,5 +61,15 @@ variable "rds_multi_az" {
   default     = false
 }
 
-
-
+variable "github_username" {
+  type        = string
+  default     = "Adnanmardini"
+}
+variable "github_repo" {
+  type        = string
+  default     = "OppShield"
+}
+variable "github_branch" {
+  type        = string
+  default     = "Devops-Opshield"
+}

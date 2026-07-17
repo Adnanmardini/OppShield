@@ -66,3 +66,28 @@ output "budget_name" {
   description = "AWS Budget name for cost monitoring"
   value       = module.budget.budget_name
 }
+
+#........ECS...........
+output "ecs_execution_role_arn" {
+  description = "Handoff to DevOps - goes in the task definition's executionRoleArn field"
+  value       = module.ecs.execution_role_arn
+}
+
+output "ecs_task_role_arn" {
+  description = "Handoff to DevOps - goes in the task definition's taskRoleArn field"
+  value       = module.ecs.task_role_arn
+}
+
+output "ecs_app_security_group_id" {
+  value = module.ecs.app_security_group_id
+}
+
+output "ecs_log_group_name" {
+  description = "Handoff to DevOps - goes in the task definition's awslogs-group field"
+  value       = module.ecs.log_group_name
+}
+
+#.......cloudtrail.......
+output "cloudtrail_bucket_name" {
+  value = module.cloudtrail.bucket_name
+}

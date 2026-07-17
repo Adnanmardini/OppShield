@@ -7,6 +7,7 @@ terraform {
     }
   }
 }
+data "aws_caller_identity" "current" {}
 
 # Configure the AWS Provider
 provider "aws" {
@@ -51,7 +52,7 @@ module "rds" {
   project                    = var.project
   vpc_id                     = module.vpc.vpc_id
   database_subnet_ids        = module.vpc.database_subnet_ids
-  allowed_security_group_ids = [] # will be filled in once DevOps has an app/ECS security group to reference
+  allowed_security_group_ids = [module.ecs.app_security_group_id]  # RDS allowed SG id from app layer now exists, this closes the gap from day 2
   multi_az                   = var.rds_multi_az
 }
 
@@ -62,4 +63,22 @@ module "secrets" {
   db_host                 = split(":", module.rds.db_endpoint)[0]
   environment = var.environment
   project     = var.project
+}
+
+module "ecs" {
+  source = "../../modules/ecs"
+
+  environment         = var.environment
+  project             = var.project
+  vpc_id              = module.vpc.vpc_id
+  private_subnet_ids  = module.vpc.private_subnet_ids
+}
+
+
+
+module "cloudtrail" {
+  source = "../../modules/cloudtrail"
+
+  environment         = var.environment
+  project             = var.project
 }

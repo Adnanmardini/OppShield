@@ -30,12 +30,13 @@
 - **License risk:** No copyleft licenses detected (carried from Stage 2). Will re-verify against current SBOM.
 
 ## Blockers / Needs From Other Teams
+- [x] DevOps: Rules 1, 2, 3, 5 — real endpoints, test credentials, and log samples received (July 17). Handed off to detection engineering.
+- [ ] DevOps/Cloud: Rule 4 (Paystack webhook endpoint + signature failure logs) — not yet received
+- [ ] Cloud: Rule 6 known-good egress IP list — not yet received
+- [ ] Cloud: Rule 7 CloudTrail IAM change sample — not yet received
+- [ ] Cloud: Rule 8 RDS max_connections value + CloudWatch Alarm feasibility — not yet received
 - [ ] DevOps: Confirm password reset fixes completed and re-submitted (was rejected in Stage 3)
-- [ ] Cloud: Known-good egress IP list for Rule 6
-- [ ] Cloud: RDS max_connections value and CloudWatch Alarm feasibility for Rule 8
 - [ ] Cloud: Confirmation on deployment/domain status for pen-test readiness
-- [ ] DevOps: Confirm app is live in staging for rule testing
-- [ ] Detection Engineering: Continue rule writing (alternative laptop power constraint noted)
 
 ## Four Midpoint Questions
 

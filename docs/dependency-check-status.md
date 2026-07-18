@@ -1,7 +1,27 @@
 # OWASP Dependency-Check — Status
 
-- Attempted: july 16 2026
-- Blocker: NVD API key requested and received, but NVD returning 403/404 on database update — likely key propagation delay (NVD-documented behavior, can take up to ~1 hour after issuance)
-- Next step: re-run once key is confirmed active
-- Command to re-run: dependency-check.sh --project "OpsShield" --scan . --format "HTML" --format "JSON" --out docs/dependency-check-report --nvdApiKey <key>
-- In the meantime: Trivy CVE scan completed and cross-verified three ways (SBOM scan, filesystem scan, filesystem scan including dev dependencies) — all show 0 vulnerabilities, consistent with dependency upgrades since Stage 4 (nodemailer 6→9, uuid→14)
+## Troubleshooting performed (July 16-17, 2026)
+1. Confirmed NVD API key is valid — direct curl request with the key returns HTTP 200
+2. Verified no hidden characters/formatting issues in the key string
+3. Purged local Dependency-Check cache and database, retried — same error
+4. Tested with unauthenticated request — same 403/404 error (ruled out simple rate-limiting)
+5. Checked for proxy interference — no proxy env vars set in this Codespace
+6. Increased --nvdApiDelay to 6000ms — same error
+7. Confirmed via curl -v that the exact NVD endpoint returns HTTP 200 for this key/environment
+8. Researched issue — confirmed this is a known, currently unresolved bug in OWASP
+   Dependency-Check itself, reported across multiple GitHub issues (#6834, #6330,
+   #6859, #6357, #7880), affecting versions 6.5.3 through 10.0.2, across environments
+   including CI/CD pipelines (Jenkins, Maven) unrelated to Codespaces
+
+## Conclusion
+This is not an issue with our key, network, or environment. It is a known, open bug
+in Dependency-Check's NVD API integration that the maintainers have not yet resolved.
+
+## Decision
+Not blocking Stage 5 checkpoint. Trivy remains the primary, cross-verified CVE source
+(0 vulnerabilities, confirmed via 3 independent scan methods: SBOM scan, filesystem scan,
+filesystem scan including dev dependencies).
+
+## Next steps
+- Monitor GitHub issue trackers for a fix release
+- Re-attempt if/when maintainers resolve the upstream bug

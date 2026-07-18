@@ -20,7 +20,6 @@ variable "database_subnet_ids" {
 variable "allowed_security_group_ids" {
   description = "Security groups allowed to connect to the database (e.g. app/ECS SG)"
   type        = list(string)
-  default     = []
 }
 
 variable "engine" {

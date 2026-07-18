@@ -7,6 +7,7 @@ terraform {
     }
   }
 }
+data "aws_caller_identity" "current" {}
 
 # Configure the AWS Provider
 provider "aws" {
@@ -37,6 +38,7 @@ module "vpc" {
   database_subnet_cidrs  = var.database_subnet_cidrs
 }
 
+
 module "budget" {
   source = "../../modules/budget"
   environment      = var.environment
@@ -45,13 +47,14 @@ module "budget" {
   project          = var.project
 }
 
+
 module "rds" {
   source = "../../modules/rds"
   environment                = var.environment
   project                    = var.project
   vpc_id                     = module.vpc.vpc_id
   database_subnet_ids        = module.vpc.database_subnet_ids
-  allowed_security_group_ids = [] # will be filled in once DevOps has an app/ECS security group to reference
+  allowed_security_group_ids = [module.ecs.app_security_group_id]  # RDS allowed SG id from app layer now exists, this closes the gap from day 2
   multi_az                   = var.rds_multi_az
 }
 
@@ -62,4 +65,41 @@ module "secrets" {
   db_host                 = split(":", module.rds.db_endpoint)[0]
   environment = var.environment
   project     = var.project
+}
+
+
+module "ecs" {
+  source = "../../modules/ecs"
+
+  environment         = var.environment
+  project             = var.project
+  vpc_id              = module.vpc.vpc_id
+  private_subnet_ids  = module.vpc.private_subnet_ids
+}
+
+
+module "cloudtrail" {
+  source = "../../modules/cloudtrail"
+
+  environment         = var.environment
+  project             = var.project
+}
+
+
+module "ecr" {
+  source = "../../modules/ecr"
+  environment    = var.environment
+  project        = var.project
+  github_username     = var.github_username
+  github_repo    = var.github_repo
+  github_branch  = var.github_branch # test deployment branch, will be updated in prod
+}
+
+
+module "alb" {
+  source = "../../modules/alb"
+  environment       = var.environment
+  project           = var.project
+  vpc_id            = module.vpc.vpc_id
+  public_subnet_ids = module.vpc.public_subnet_ids
 }

@@ -48,6 +48,9 @@ resource "aws_db_instance" "main" {
   db_name  = var.db_name
   username = var.master_username
 
+  #creates cloudwatch group automatically, rds handles this natively
+  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+
   # AWS creates and manages the master password automatically in
   # Secrets Manager - we never see or set the password ourselves.
   manage_master_user_password = true

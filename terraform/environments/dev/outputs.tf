@@ -66,3 +66,47 @@ output "budget_name" {
   description = "AWS Budget name for cost monitoring"
   value       = module.budget.budget_name
 }
+
+#........ECS...........
+output "ecs_execution_role_arn" {
+  description = "Handoff to DevOps - goes in the task definition's executionRoleArn field"
+  value       = module.ecs.execution_role_arn
+}
+
+output "ecs_task_role_arn" {
+  description = "Handoff to DevOps - goes in the task definition's taskRoleArn field"
+  value       = module.ecs.task_role_arn
+}
+
+output "ecs_app_security_group_id" {
+  value = module.ecs.app_security_group_id
+}
+
+output "ecs_log_group_name" {
+  description = "Handoff to DevOps - goes in the task definition's awslogs-group field"
+  value       = module.ecs.log_group_name
+}
+
+#.......cloudtrail.......
+output "cloudtrail_bucket_name" {
+  value = module.cloudtrail.bucket_name
+}
+
+# .......ECR.......
+output "ecr_repository_url" {
+  value = module.ecr.repository_url
+}
+
+output "github_actions_role_arn" {
+  value = module.ecr.github_actions_role_arn
+}
+
+#.......ALB.......
+output "alb_logs_bucket_name" {
+  value = module.alb.alb_logs_bucket_name
+}
+
+output "alb_target_group_arn" {
+  description = "Handsoff to DevOps - needed for ECS service definition task registering with the ALB"
+  value       = module.alb.target_group_arn
+}

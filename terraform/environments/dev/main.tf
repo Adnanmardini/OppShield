@@ -75,6 +75,8 @@ module "ecs" {
   project             = var.project
   vpc_id              = module.vpc.vpc_id
   private_subnet_ids  = module.vpc.private_subnet_ids
+  cluster_name   = module.ecs.cluster_name
+  service_name   = "opsshield-dev-service"
 }
 
 
@@ -102,4 +104,14 @@ module "alb" {
   project           = var.project
   vpc_id            = module.vpc.vpc_id
   public_subnet_ids = module.vpc.public_subnet_ids
+  acm_certificate_arn = module.acm.certificate_arn
+}
+
+
+module "acm" {
+  source = "../../modules/acm"
+
+  environment  = "dev"
+  domain_name  = var.domain_name
+  subject_alternative_names = ["*.srzoh.com.ng"]
 }

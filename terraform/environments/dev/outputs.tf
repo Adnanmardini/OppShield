@@ -110,3 +110,15 @@ output "alb_target_group_arn" {
   description = "Handsoff to DevOps - needed for ECS service definition task registering with the ALB"
   value       = module.alb.target_group_arn
 }
+
+output "alb_dns_name" {
+  value = module.alb.alb_dns_name
+}
+
+output "acm_certificate_arn" {
+ value = module.acm.certificate_arn
+}
+
+output "acm_validation_record" {
+  value = "${module.acm.validation_record_name} ${module.acm.validation_record_type} ${module.acm.validation_record_value}"
+}

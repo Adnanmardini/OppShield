@@ -73,3 +73,8 @@ variable "github_branch" {
   type        = string
   default     = "Devops-Opshield"
 }
+
+variable "domain_name" {
+  type        = string
+  default     = "staging.srzoh.com.ng"
+}

@@ -22,3 +22,7 @@ output "app_security_group_id" {
 output "log_group_name" {
   value = aws_cloudwatch_log_group.ecs_app.name
 }
+
+output "scalable_target_resource_id" {
+  value = aws_appautoscaling_target.ecs.resource_id
+}

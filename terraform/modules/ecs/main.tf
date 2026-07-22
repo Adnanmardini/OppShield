@@ -89,3 +89,49 @@ resource "aws_security_group" "ecs_app" {
     Environment = var.environment
   }
 }
+
+
+#.......ECS Autoscaling........
+resource "aws_appautoscaling_target" "ecs" {
+  max_capacity       = var.max_capacity
+  min_capacity       = var.min_capacity
+  resource_id        = "service/${var.cluster_name}/${var.service_name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+# CPU-based target tracking - scales out when average CPU exceeds the target
+resource "aws_appautoscaling_policy" "cpu" {
+  name               = "${var.project}-${var.environment}-cpu-scaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value       = var.cpu_target_value
+    scale_in_cooldown  = 300 # waits 5 min before scaling back in to avoid flapping
+    scale_out_cooldown = 60  # scales out quickly when under real load
+  }
+}
+
+# Memory-based target tracking - a second, independent trigger
+resource "aws_appautoscaling_policy" "memory" {
+  name               = "${var.project}-${var.environment}-memory-scaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+    target_value       = 75
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+  }
+}

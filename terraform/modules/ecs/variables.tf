@@ -23,3 +23,28 @@ variable "log_retention_days" {
   type        = number
   default     = 30
 }
+
+variable "cluster_name" {
+  type = string
+}
+
+variable "service_name" {
+  description = "ECS service name - from DevOps's service definition"
+  type        = string
+}
+
+variable "min_capacity" {
+  type    = number
+  default = 1
+}
+
+variable "max_capacity" {
+  type    = number
+  default = 4
+}
+
+variable "cpu_target_value" {
+  description = "Target CPU utilization % - scales out above this"
+  type        = number
+  default     = 70
+}

@@ -9,3 +9,6 @@ coverage/
 dist/
 .env
 .env.*
+stackbridge/
+awscliv2.zip
+aws/

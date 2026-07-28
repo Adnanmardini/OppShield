@@ -1,0 +1,22 @@
+title = "OpsShield Gitleaks Config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "paystack-secret-key"
+description = "Paystack Secret Key (live or test)"
+regex = '''sk_(live|test)_[a-zA-Z0-9]{32,}'''
+tags = ["key", "paystack"]
+
+[[rules]]
+id = "paystack-public-key"
+description = "Paystack Public Key (live or test)"
+regex = '''pk_(live|test)_[a-zA-Z0-9]{32,}'''
+tags = ["key", "paystack"]
+
+[allowlist]
+description = "Ignore example/placeholder values"
+paths = [
+  '''\.env\.example$''',
+]

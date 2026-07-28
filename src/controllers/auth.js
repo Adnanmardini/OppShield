@@ -6,6 +6,34 @@ const prisma = require('../lib/prisma');
 const logger = require('../lib/logger');
 const audit = require('../lib/audit');
 
+const ACCESS_TOKEN_COOKIE = 'accessToken';
+const REFRESH_TOKEN_COOKIE = 'refreshToken';
+const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000;       // 15 minutes
+const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+// Cookies need SameSite=None + Secure to survive cross-site requests
+// (frontend and API are on different domains). Falls back to Lax/insecure
+// for local http dev, since Secure cookies require https.
+function cookieOptions(maxAgeMs) {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: maxAgeMs,
+    path: '/',
+  };
+}
+
+function setAuthCookies(res, accessToken, refreshToken) {
+  res.cookie(ACCESS_TOKEN_COOKIE, accessToken, cookieOptions(ACCESS_TOKEN_MAX_AGE));
+  res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, cookieOptions(REFRESH_TOKEN_MAX_AGE));
+}
+
+function clearAuthCookies(res) {
+  res.clearCookie(ACCESS_TOKEN_COOKIE, { path: '/' });
+  res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/' });
+}
+
 // ─── Register ──────────────────────────────────────────────────────
 async function register(req, res, next) {
   try {
@@ -72,7 +100,11 @@ async function register(req, res, next) {
       ipAddress: req.ip,
     });
 
+    setAuthCookies(res, token, refreshToken);
+
     res.status(201).json({
+      // TODO: remove accessToken/refreshToken from body once Stage 7 pentest
+      // is complete — cookies alone should be the sole auth mechanism.
       accessToken: token,
       refreshToken: refreshToken,
       user: {
@@ -96,7 +128,6 @@ async function register(req, res, next) {
 // ─── Login ─────────────────────────────────────────────────────────
 async function login(req, res, next) {
   try {
-    console.log('📥 Login request body:', req.body);
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -132,7 +163,11 @@ async function login(req, res, next) {
       { expiresIn: '7d' }
     );
 
+    setAuthCookies(res, token, refreshToken);
+
     res.json({
+      // TODO: remove accessToken/refreshToken from body once Stage 7 pentest
+      // is complete — cookies alone should be the sole auth mechanism.
       accessToken: token,
       refreshToken: refreshToken,
       user: {
@@ -152,14 +187,14 @@ async function login(req, res, next) {
 // ─── Refresh Token ───────────────────────────────────────────────
 async function refresh(req, res, next) {
   try {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
 
     if (!refreshToken) {
-      return res.status(400).json({ error: 'Refresh token required' });
+      return res.status(401).json({ error: 'Refresh token required' });
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    
+
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId }
     });
@@ -178,9 +213,12 @@ async function refresh(req, res, next) {
       { expiresIn: '15m' }
     );
 
-    res.json({ accessToken: token });
+    res.cookie(ACCESS_TOKEN_COOKIE, token, cookieOptions(ACCESS_TOKEN_MAX_AGE));
+
+    res.json({ message: 'Token refreshed' });
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
+      clearAuthCookies(res);
       return res.status(401).json({ error: 'Refresh token expired' });
     }
     console.error('❌ Refresh error:', err);
@@ -191,6 +229,7 @@ async function refresh(req, res, next) {
 // ─── Logout ───────────────────────────────────────────────────────
 async function logout(req, res, next) {
   try {
+    clearAuthCookies(res);
     res.json({ message: 'Logged out successfully' });
   } catch (err) {
     console.error('❌ Logout error:', err);

@@ -3,6 +3,10 @@ node_modules/
 *.tfstate
 *.tfstate.backup
 .terraform/
+*.tfvars.json
+*.terraform.lock.hcl
+*.tfvars
+devplan
 coverage/
 *.log
 .DS_Store
